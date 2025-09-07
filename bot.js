@@ -112,11 +112,11 @@ async function sendFridayTradition() {
     });
 }
 
-cron.schedule('0 9 * * 5', () => {
+cron.schedule('0 8 * * 5', () => {
     console.log('Sending Friday tradition message...');
     sendFridayTradition();
 }, {
-    timezone: "America/New_York"
+    timezone: "America/Chicago"
 });
 
 client.login(process.env.DISCORD_TOKEN);
