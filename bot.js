@@ -31,7 +31,8 @@ function getRandomGif() {
         file.toLowerCase().endsWith('.gif') || 
         file.toLowerCase().endsWith('.png') || 
         file.toLowerCase().endsWith('.jpg') || 
-        file.toLowerCase().endsWith('.jpeg')
+        file.toLowerCase().endsWith('.jpeg') ||
+        file.toLowerCase().endsWith('.webp')
     );
     
     if (files.length === 0) {
@@ -48,7 +49,7 @@ client.once(Events.Ready, () => {
 });
 
 client.on(Events.GuildMemberAdd, member => {
-    const welcomeChannel = member.guild.systemChannel || member.guild.channels.cache.find(ch => ch.name === 'general');
+    const welcomeChannel = member.guild.channels.cache.get(process.env.CHANNEL_ID);
     
     if (welcomeChannel) {
         const randomMessage = getRandomElement(welcomeMessages.faris_welcome_messages);
@@ -61,7 +62,7 @@ client.on(Events.GuildMemberAdd, member => {
 client.on(Events.MessageCreate, async message => {
     if (message.author.bot) return;
     
-    const OWNER_ID = '426957605634834452';
+    const OWNER_ID = process.env.OWNER_ID;
     
     if (message.author.id === OWNER_ID) {
         if (message.content === '!test welcome') {
@@ -91,9 +92,7 @@ async function sendFridayTradition() {
     const guilds = client.guilds.cache;
     
     guilds.forEach(async (guild) => {
-        const channel = guild.systemChannel || 
-                       guild.channels.cache.find(ch => ch.name === 'general') ||
-                       guild.channels.cache.find(ch => ch.type === 0);
+        const channel = guild.channels.cache.get(process.env.CHANNEL_ID);
         
         if (channel) {
             const randomTradition = getRandomElement(fridayTraditions.faris_friday_tradition);
@@ -112,11 +111,24 @@ async function sendFridayTradition() {
     });
 }
 
-cron.schedule('0 8 * * 5', () => {
+function parseFridayTime(timeStr) {
+    const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return { minute: 0, hour: 8 };
+    let hour = parseInt(match[1]);
+    const minute = parseInt(match[2]);
+    const period = match[3].toUpperCase();
+    if (period === 'AM' && hour === 12) hour = 0;
+    if (period === 'PM' && hour !== 12) hour += 12;
+    return { minute, hour };
+}
+
+const { minute, hour } = parseFridayTime(process.env.FRIDAY_TIME || '8:00 AM');
+
+cron.schedule(`${minute} ${hour} * * 5`, () => {
     console.log('Sending Friday tradition message...');
     sendFridayTradition();
 }, {
-    timezone: "America/Chicago"
+    timezone: process.env.TIMEZONE || "America/Chicago"
 });
 
 client.login(process.env.DISCORD_TOKEN);
