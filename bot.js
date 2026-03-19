@@ -45,7 +45,15 @@ function getRandomGif() {
 }
 
 client.once(Events.Ready, () => {
-    console.log(`Logged in as ${client.user.tag}!`);
+    console.log('========================================');
+    console.log(`  Bot: ${client.user.tag}`);
+    console.log(`  Servers: ${client.guilds.cache.size}`);
+    console.log(`  Commands: !test welcome, !test friday`);
+    console.log(`  Friday Time: ${process.env.FRIDAY_TIME || '8:00 AM'}`);
+    console.log(`  Timezone: ${process.env.TIMEZONE || 'America/Chicago'}`);
+    console.log(`  Channel ID: ${process.env.CHANNEL_ID || 'Not set'}`);
+    console.log('========================================');
+    console.log('Bot is online and ready!');
 });
 
 client.on(Events.GuildMemberAdd, member => {
@@ -66,12 +74,14 @@ client.on(Events.MessageCreate, async message => {
     
     if (message.author.id === OWNER_ID) {
         if (message.content === '!test welcome') {
+            message.delete().catch(() => {});
             const randomMessage = getRandomElement(welcomeMessages.faris_welcome_messages);
             const personalizedMessage = randomMessage.replace('{user}', `<@${message.author.id}>`);
             message.channel.send(personalizedMessage);
         }
         
         if (message.content === '!test friday') {
+            message.delete().catch(() => {});
             const randomTradition = getRandomElement(fridayTraditions.faris_friday_tradition);
             const randomGifPath = getRandomGif();
             
