@@ -44,7 +44,7 @@ function getRandomGif() {
     return path.join(gifFolder, randomFile);
 }
 
-client.once(Events.Ready, () => {
+client.once(Events.ClientReady, () => {
     console.log('========================================');
     console.log(`  Bot: ${client.user.tag}`);
     console.log(`  Servers: ${client.guilds.cache.size}`);
@@ -141,4 +141,8 @@ cron.schedule(`${minute} ${hour} * * 5`, () => {
     timezone: process.env.TIMEZONE || "America/Chicago"
 });
 
-client.login(process.env.DISCORD_TOKEN);
+console.log('Connecting to Discord...');
+client.login(process.env.DISCORD_TOKEN).catch(err => {
+    console.error('Failed to login:', err.message);
+    process.exit(1);
+});
